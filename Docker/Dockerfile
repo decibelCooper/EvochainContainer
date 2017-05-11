@@ -5,7 +5,6 @@
 FROM dbcooper/arch:2017-02-18
 
 # Set up basic environment
-## Required tools from Arch repository
 RUN pacman -S --noconfirm \
 	sed \
 	sudo
@@ -19,7 +18,6 @@ WORKDIR /home/fpadsimuser
 CMD /bin/bash -l
 
 # ROOT
-## Required tools from Arch repository
 RUN sudo pacman -S --noconfirm \
 	awk \
 	base \
@@ -74,7 +72,6 @@ RUN git clone https://aur.archlinux.org/root-extra.git && \
 	sudo bash -c 'echo "export ROOTSYS=/" >> /etc/profile.d/root.sh'
 
 # GEANT4
-## Required tools from Arch repository
 RUN sudo pacman -S --noconfirm \
 	xerces-c
 
@@ -94,13 +91,12 @@ RUN git clone https://aur.archlinux.org/soxt.git && \
 	cd .. && \
 	rm -rf soxt
 
-## Required tools from Arch repository
 RUN sudo pacman -S --noconfirm \
 	wget
 
 ENV G4VERSION 10.03.p01
 
-RUN wget http://geant4.cern.ch/support/source/geant4.$G4VERSION.tar.gz && \
+RUN wget -q http://geant4.cern.ch/support/source/geant4.$G4VERSION.tar.gz && \
 	tar -xzf geant4.$G4VERSION.tar.gz && \
 	mkdir geant4-build && \
 	cd geant4-build && \
@@ -125,7 +121,7 @@ RUN git clone https://aur.archlinux.org/jdk.git && \
 RUN sudo pacman -S --noconfirm \
 	wget
 
-RUN wget http://atlaswww.hep.anl.gov/asc/jas4pp/download/current.php -O jas4pp.tgz && \
+RUN wget -q http://atlaswww.hep.anl.gov/asc/jas4pp/download/current.php -O jas4pp.tgz && \
 	tar -xzf jas4pp.tgz -C /opt && \
 	rm jas4pp.tgz && \
 	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/jas4pp.sh" && \
@@ -134,11 +130,10 @@ RUN wget http://atlaswww.hep.anl.gov/asc/jas4pp/download/current.php -O jas4pp.t
 	source /opt/jas4pp/setup.sh
 
 # ProMC
-## Required tools from Arch repository
 RUN sudo pacman -S --noconfirm \
 	rsync
 
-RUN wget http://atlaswww.hep.anl.gov/asc/promc/download/current.php -O ProMC.tgz && \
+RUN wget -q http://atlaswww.hep.anl.gov/asc/promc/download/current.php -O ProMC.tgz && \
 	tar -xzf ProMC.tgz && \
 	cd ProMC && \
 	./build.sh && \
@@ -232,7 +227,7 @@ RUN git clone https://github.com/PandoraPFA/PandoraPFA.git && \
 	sudo chmod +x /etc/profile.d/PandoraPFA.sh
 
 # slicPandora
-RUN wget http://www.hep.phy.cam.ac.uk/~marshall/slicPandora_Pandora_v02.09.00_patch1.tar.gz -O slicPandora.tar.gz && \
+RUN wget -q http://www.hep.phy.cam.ac.uk/~marshall/slicPandora_Pandora_v02.09.00_patch1.tar.gz -O slicPandora.tar.gz && \
 	tar -xzf slicPandora.tar.gz && \
 	sudo chown -R root:root slicPandora && \
 	sudo mv slicPandora/HEAD /opt/slicPandora && \
@@ -276,21 +271,38 @@ RUN sudo pacman -S --noconfirm \
 	libxtst \
 	zip
 
-# LCSIM
-ENV LCSIM_VERSION 3.8
+# JNIMathLib
+RUN git clone https://github.com/decibelCooper/JNIMathLib.git /opt/JNIMathLib &&\
+	cd /opt/JNIMathLib && \
+	make -j30 && \
+	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/JNIMathLib.sh" && \
+	echo ". /opt/JNIMathLib/bin/JNIMathLib-env.sh" | sudo bash -c "cat >> /etc/profile.d/JNIMathLib.sh" && \
+	sudo chmod +x /etc/profile.d/JNIMathLib.sh
 
-RUN mkdir lcsim && \
-	cd lcsim && \
-	mkdir -p distribution/target && \
-	cd distribution/target && \
-	wget http://srs.slac.stanford.edu/nexus/content/groups/lcsim-maven2-public/org/lcsim/lcsim-distribution/$LCSIM_VERSION/lcsim-distribution-$LCSIM_VERSION-bin.jar && \
-	cd ../../ && \
-	mkdir -p detector-framework/target && \
-	cd detector-framework/target && \
-	wget http://srs.slac.stanford.edu/nexus/content/groups/lcsim-maven2-public/org/lcsim/lcsim-detector-framework/$LCSIM_VERSION/lcsim-detector-framework-$LCSIM_VERSION-bin.jar && \
-	cd ../../../ && \
-	mv lcsim /opt/ && \
+# LCSIM
+RUN sudo pacman -S --noconfirm \
+	maven \
+	svn
+
+ENV LCSIM_VERSION 3.4
+
+RUN svn co svn://svn.freehep.org/lcdet/projects/lcsim/tags/lcsim-$LCSIM_VERSION/ /opt/lcsim && \
+	cd /opt/lcsim/detector-framework && \
+	mvn
+
+RUN cd /opt/lcsim/detector-framework && \
+	. /opt/JNIMathLib/bin/JNIMathLib-env.sh && \
+	mvn install:install-file -Dfile=$(ls /opt/JNIMathLib/*.jar) -DgroupId=eic -DartifactId=jnimathlib -Dversion=0.1 -Dpackaging=jar && \
+	sed -i 's/<\/dependencies>/    <dependency><groupId>eic<\/groupId><artifactId>jnimathlib<\/artifactId><version>0.1<\/version><\/dependency>\n    <\/dependencies>/' pom.xml && \
+	sed -i 's/\<Math.acos/eic.jnimathlib.CMath.acos/' ./src/main/java/org/lcsim/detector/solids/GeomOp3D.java && \
+	sed -i 's/\(import java\.util\.List;\)/\1\n\nimport eic\.jnimathlib\.CMath;/' ./src/main/java/org/lcsim/detector/solids/GeomOp3D.java
+
+RUN cd /opt/lcsim/detector-framework && \
+	. /opt/JNIMathLib/bin/JNIMathLib-env.sh && \
+	mvn && \
+	cd ../distribution && \
+	mvn && \
 	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
-	echo 'export CLICSOFT=/opt/lcsim; export GEOMCONVERTERDIR=$CLICSOFT/detector-framework; export GCONVERTER=$GEOMCONVERTERDIR/target/lcsim-detector-framework-$LCSIM_VERSION-bin.jar' | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
+	echo "export CLICSOFT=/opt/lcsim; export GEOMCONVERTERDIR=\$CLICSOFT/detector-framework; export GCONVERTER=\$GEOMCONVERTERDIR/target/lcsim-detector-framework-$LCSIM_VERSION-bin.jar" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
 	sudo chmod +x /etc/profile.d/lcsim.sh
 
