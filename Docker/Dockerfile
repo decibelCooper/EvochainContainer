@@ -168,14 +168,14 @@ ENV LCIO_DIR /opt/LCIO
 
 RUN git clone https://github.com/iLCSoft/LCIO.git && \
         cd LCIO && \
-	git checkout a0699e2fd9eaf8d9bc03a1ca7d1d0de07c273ff2 && \
+	git checkout dd953fa4f108e784938a48ea6dc498783e4d2b20 && \
 	cd ../ && \
 	mv LCIO $LCIO_DIR && \
 	mkdir build && \
 	cd build && \
 	CXXFLAGS=-std=c++14 cmake $LCIO_DIR && \
 	make -j30 && \
-	sudo make install && \
+	make install && \
 	cd ../ && \
 	rm -rf build && \
 	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/LCIO.sh" && \
@@ -284,7 +284,7 @@ RUN sudo pacman -S --noconfirm \
 	maven \
 	svn
 
-ENV LCSIM_VERSION 3.4
+ENV LCSIM_VERSION 3.8
 
 RUN svn co svn://svn.freehep.org/lcdet/projects/lcsim/tags/lcsim-$LCSIM_VERSION/ /opt/lcsim && \
 	cd /opt/lcsim/detector-framework && \
