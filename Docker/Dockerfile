@@ -118,6 +118,9 @@ RUN git clone https://aur.archlinux.org/jdk.git && \
 	rm -rf jdk
 
 # Jas4pp
+RUN sudo pacman -S --noconfirm \
+	wget
+
 RUN wget -q http://atlaswww.hep.anl.gov/asc/jas4pp/download/current.php -O jas4pp.tgz && \
 	tar -xzf jas4pp.tgz -C /opt && \
 	rm jas4pp.tgz && \
@@ -167,13 +170,14 @@ RUN git clone https://github.com/iLCSoft/LCIO.git && \
         cd LCIO && \
 	git checkout dd953fa4f108e784938a48ea6dc498783e4d2b20 && \
 	cd ../ && \
+	mv LCIO $LCIO_DIR && \
 	mkdir build && \
 	cd build && \
-	CXXFLAGS=-std=c++14 cmake -DCMAKE_INSTALL_PREFIX=$LCIO_DIR ../LCIO && \
+	CXXFLAGS=-std=c++14 cmake $LCIO_DIR && \
 	make -j30 && \
 	make install && \
 	cd ../ && \
-	rm -rf build LCIO && \
+	rm -rf build && \
 	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/LCIO.sh" && \
 	sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' >> /etc/profile.d/LCIO.sh" && \
 	sudo chmod +x /etc/profile.d/LCIO.sh
@@ -183,7 +187,7 @@ ENV SLIC_DIR /opt/slic
 
 RUN git clone https://github.com/slaclab/slic.git && \
 	cd slic && \
-	git checkout 7231e1d85f60548d9ae562b396e84154f0bae471 && \
+	git checkout 688a8e82551f174aa7bd7b9471bcb264d7164ea0 && \
 	echo 'SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -ldl" )' >> CMakeLists.txt && \
 	cd ../ && \
 	mkdir build && \
@@ -229,7 +233,7 @@ RUN wget -q http://www.hep.phy.cam.ac.uk/~marshall/slicPandora_Pandora_v02.09.00
 	sudo mv slicPandora/HEAD /opt/slicPandora && \
 	mkdir build && \
 	cd build && \
-	CXXFLAGS=-std=c++14 cmake /opt/slicPandora -DILCUTIL_DIR=$ILCUTIL_DIR -DLCIO_DIR=$LCIO_DIR \
+	CXXFLAGS=-std=c++14 cmake /opt/slicPandora -DILCUTIL_DIR=$ILCUTIL_DIR -DLCIO_DIR=$LCIO_DIR -DPandoraPFA_DIR=/opt/PandoraPFA \
 		-DPandoraSDK_DIR=/opt/PandoraPFA -DLCContent_DIR=/opt/PandoraPFA -DCMAKE_SKIP_RPATH=1 && \
 	make -j30 && \
 	sudo make install && \
