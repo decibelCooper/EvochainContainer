@@ -36,28 +36,28 @@ RUN sudo pacman -S --noconfirm \
 RUN git clone https://aur.archlinux.org/pythia8.git && \
 	cd pythia8 && \
 	git checkout af8ab26e033e01988346b1e933f033135e1be33b && \
-	MAKEFLAGS=-j20 makepkg -si --noconfirm && \
+	MAKEFLAGS=-j10 makepkg -si --noconfirm && \
 	cd .. && \
 	rm -rf pythia8
 
 RUN git clone https://aur.archlinux.org/unuran.git && \
 	cd unuran && \
 	git checkout f26893309bccabf313895b7aa661b28f2c379950 && \
-	MAKEFLAGS=-j20 makepkg -si --noconfirm && \
+	MAKEFLAGS=-j10 makepkg -si --noconfirm && \
 	cd .. && \
 	rm -rf unuran
 
 RUN git clone https://aur.archlinux.org/xrootd-abi0.git && \
 	cd xrootd-abi0 && \
 	git checkout d75c13211f62fdf6618c7d7399b1ed68482c2e55 && \
-	MAKEFLAGS=-j20 makepkg -si --noconfirm && \
+	MAKEFLAGS=-j10 makepkg -si --noconfirm && \
 	cd .. && \
 	rm -rf xrootd-abi0
 
 RUN git clone https://aur.archlinux.org/libafterimage.git && \
 	cd libafterimage && \
 	git checkout 15cf333b40a64f2b802a7b90ffd55548d78c366c && \
-	MAKEFLAGS=-j20 makepkg -si --noconfirm && \
+	MAKEFLAGS=-j10 makepkg -si --noconfirm && \
 	cd .. && \
 	rm -rf libafterimage
 
@@ -66,7 +66,7 @@ RUN git clone https://aur.archlinux.org/root-extra.git && \
 	git checkout 036a35c9076f8b5fd3798c1c7d37ec72a979e249 && \
 	echo "set (gdml ON CACHE BOOL \"\" FORCE)" >> settings.cmake && \
 	updpkgsums && \
-	MAKEFLAGS=-j20 makepkg -si --noconfirm && \
+	MAKEFLAGS=-j10 makepkg -si --noconfirm && \
 	cd .. && \
 	rm -rf root-extra && \
 	sudo bash -c 'echo "export ROOTSYS=/" >> /etc/profile.d/root.sh'
@@ -78,7 +78,7 @@ RUN sudo pacman -S --noconfirm \
 RUN git clone https://aur.archlinux.org/qt5-quick1.git && \
 	cd qt5-quick1 && \
 	git checkout b40a399ab8d7b1a38619e515b240960e0429d722 && \
-	sed -i.bak 's/^\( *make\)$/\1 -j30/' PKGBUILD && \
+	sed -i.bak 's/^\( *make\)$/\1 -j10/' PKGBUILD && \
 	makepkg -si --noconfirm && \
 	cd .. && \
 	rm -rf qt5-quick1
@@ -86,7 +86,7 @@ RUN git clone https://aur.archlinux.org/qt5-quick1.git && \
 RUN git clone https://aur.archlinux.org/soxt.git && \
 	cd soxt && \
 	git checkout b35aafe46c75da6d20b4dea51ab347daea69fa43 && \
-	sed -i.bak 's/^\( *make\)$/\1 -j30/' PKGBUILD && \
+	sed -i.bak 's/^\( *make\)$/\1 -j10/' PKGBUILD && \
 	makepkg -si --noconfirm && \
 	cd .. && \
 	rm -rf soxt
@@ -101,7 +101,7 @@ RUN wget -q http://geant4.cern.ch/support/source/geant4.$G4VERSION.tar.gz && \
 	mkdir geant4-build && \
 	cd geant4-build && \
 	cmake ../geant4.$G4VERSION -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_GDML=ON && \
-	make -j30 && \
+	make -j10 && \
 	sudo make install && \
 	cd .. && \
 	rm -rf geant4* && \
@@ -152,7 +152,7 @@ RUN git clone https://github.com/iLCSoft/iLCUtil.git && \
 	mkdir build && \
 	cd build && \
 	cmake ../iLCUtil -DCMAKE_INSTALL_PREFIX=$ILCUTIL_DIR && \
-	make -j20 && \
+	make -j10 && \
 	sudo make install && \
 	cd ../ && \
 	rm -rf iLCUtil build && \
@@ -170,7 +170,7 @@ RUN git clone https://github.com/iLCSoft/LCIO.git && \
 	mkdir build && \
 	cd build && \
 	CXXFLAGS=-std=c++14 cmake -DCMAKE_INSTALL_PREFIX=$LCIO_DIR ../LCIO && \
-	make -j30 && \
+	make -j10 && \
 	make install && \
 	cd ../ && \
 	rm -rf build LCIO && \
@@ -188,10 +188,10 @@ RUN git clone https://github.com/slaclab/slic.git && \
 	cd ../ && \
 	mkdir build && \
 	cd build && \
-	CXXFLAGS=-std=c++14 cmake ../slic -DINSTALL_DEPENDENCIES=ON -DCMAKE_INSTALL_PREFIX=$SLIC_DIR && \
-	make -j30 && \
-	CXXFLAGS=-std=c++14 cmake ../slic -DINSTALL_DEPENDENCIES=ON -DCMAKE_INSTALL_PREFIX=$SLIC_DIR && \
-	make -j30 VERBOSE=1 && \
+	CXXFLAGS=-std=c++14 cmake ../slic -DINSTALL_DEPENDENCIES=ON -DCMAKE_INSTALL_PREFIX=$SLIC_DIR -DLCIO_DIR=$LCIO_DIR && \
+	make -j10 && \
+	CXXFLAGS=-std=c++14 cmake ../slic -DINSTALL_DEPENDENCIES=ON -DCMAKE_INSTALL_PREFIX=$SLIC_DIR -DLCIO_DIR=$LCIO_DIR && \
+	make -j10 VERBOSE=1 && \
 	sudo make install && \
 	cd ../ && \
 	rm -rf slic build && \
@@ -218,7 +218,7 @@ RUN git clone https://github.com/PandoraPFA/PandoraPFA.git && \
 	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/PandoraPFA.sh" && \
 	sudo bash -c "CXXFLAGS=-std=c++14 cmake -DCMAKE_MODULE_PATH=$ROOTSYS/etc/cmake -DPANDORA_MONITORING=ON -DPANDORA_EXAMPLE_CONTENT=OFF \
 		-DPANDORA_LAR_CONTENT=OFF -DPANDORA_LC_CONTENT=ON ../" && \
-	sudo make -j30 install && \
+	sudo make -j10 install && \
 	echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/PandoraPFA/lib' | sudo bash -c "cat >> /etc/profile.d/PandoraPFA.sh" && \
 	sudo chmod +x /etc/profile.d/PandoraPFA.sh
 
@@ -231,7 +231,7 @@ RUN wget -q http://www.hep.phy.cam.ac.uk/~marshall/slicPandora_Pandora_v02.09.00
 	cd build && \
 	CXXFLAGS=-std=c++14 cmake /opt/slicPandora -DILCUTIL_DIR=$ILCUTIL_DIR -DLCIO_DIR=$LCIO_DIR \
 		-DPandoraSDK_DIR=/opt/PandoraPFA -DLCContent_DIR=/opt/PandoraPFA -DCMAKE_SKIP_RPATH=1 && \
-	make -j30 && \
+	make -j10 && \
 	sudo make install && \
 	cd ../ && \
 	sudo rm -rf build slicPandora slicPandora.tar.gz && \
@@ -270,7 +270,7 @@ RUN sudo pacman -S --noconfirm \
 # JNIMathLib
 RUN git clone https://github.com/decibelCooper/JNIMathLib.git /opt/JNIMathLib &&\
 	cd /opt/JNIMathLib && \
-	make -j30 && \
+	make -j10 && \
 	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/JNIMathLib.sh" && \
 	echo ". /opt/JNIMathLib/bin/JNIMathLib-env.sh" | sudo bash -c "cat >> /etc/profile.d/JNIMathLib.sh" && \
 	sudo chmod +x /etc/profile.d/JNIMathLib.sh
