@@ -71,7 +71,9 @@ RUN git clone https://github.com/iLCSoft/LCIO.git && \
 	cd ../ && \
 	mkdir build && \
 	cd build && \
-	CXXFLAGS=-std=c++14 cmake -DCMAKE_INSTALL_PREFIX=$LCIO_DIR ../LCIO && \
+	CXXFLAGS=-std=c++14 cmake ../LCIO \
+	    -DBUILD_ROOTDICT=ON \
+	    -DCMAKE_INSTALL_PREFIX=$LCIO_DIR && \
 	make -j30 && \
 	sudo make install && \
 	cd ../ && \
