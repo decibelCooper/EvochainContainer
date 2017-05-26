@@ -1,6 +1,6 @@
 # Author: David Blyth
-# Description: Docker build replicating the FPaDSim environment from Sergei Chekanov
-#     except for splicing in DD4Hep for simulation.
+# Description: Docker build merging the FPaDSim chain from Sergei Chekanov
+#     with long-term EIC efforts at ANL
 
 FROM dbcooper/arch:2017-05-02
 
@@ -61,25 +61,27 @@ RUN git clone https://github.com/root-project/root.git && \
 	cd .. && \
 	rm -rf build root
 
+RUN sudo bash -c 'echo ". /usr/local/bin/thisroot.sh" > /etc/profile.d/ROOT.sh' && \
+        sudo chmod +x /etc/profile.d/ROOT.sh
+
 # LCIO
 ENV	LCIO_VERSION 02-08
 ENV	LCIO_DIR /opt/LCIO
 
-RUN git clone https://github.com/iLCSoft/LCIO.git && \
-        cd LCIO && \
+RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
+        cd $LCIO_DIR && \
 	git checkout tags/v$LCIO_VERSION && \
-	cd ../ && \
+	cd ~/ && \
 	mkdir build && \
 	cd build && \
-	CXXFLAGS=-std=c++14 cmake ../LCIO \
-	    -DBUILD_ROOTDICT=ON \
-	    -DCMAKE_INSTALL_PREFIX=$LCIO_DIR && \
+	CXXFLAGS=-std=c++14 cmake $LCIO_DIR \
+	    -DBUILD_ROOTDICT=ON && \
 	make -j30 && \
-	sudo make install && \
+	make install && \
 	cd ../ && \
-	rm -rf build LCIO && \
-	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/LCIO.sh" && \
-	sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' >> /etc/profile.d/LCIO.sh" && \
+	rm -rf build
+
+RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' >> /etc/profile.d/LCIO.sh" && \
 	sudo chmod +x /etc/profile.d/LCIO.sh
 
 # CLHEP
@@ -121,8 +123,9 @@ RUN git clone https://github.com/Geant4/geant4.git && \
         make -j30 && \
         sudo make install && \
         cd .. && \
-        rm -rf build geant4 && \
-        sudo bash -c 'echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib64" >> /etc/profile.d/geant4.sh' && \
+        rm -rf build geant4
+
+RUN sudo bash -c 'echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib64" >> /etc/profile.d/geant4.sh' && \
         sudo bash -c 'echo ". /usr/local/bin/geant4.sh" > /etc/profile.d/geant4.sh' && \
         sudo chmod +x /etc/profile.d/geant4.sh
 
