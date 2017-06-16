@@ -66,8 +66,16 @@ RUN git clone https://github.com/root-project/root.git && \
 RUN sudo bash -c 'echo ". /usr/local/bin/thisroot.sh" > /etc/profile.d/ROOT.sh' && \
         sudo chmod +x /etc/profile.d/ROOT.sh
 
+# Oracle JDK
+RUN git clone https://aur.archlinux.org/jdk.git && \
+	cd jdk && \
+	git checkout eaa4d0bec2f6b573c15c1214c030198215bcb1b2 && \
+	makepkg -si --noconfirm && \
+	cd .. && \
+	rm -rf jdk
+
 # LCIO
-ENV	LCIO_VERSION 02-08
+ENV	LCIO_VERSION 02-04-03
 ENV	LCIO_DIR /opt/LCIO
 
 RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
@@ -84,6 +92,7 @@ RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
 	rm -rf build
 
 RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' >> /etc/profile.d/LCIO.sh" && \
+	sudo bash -c "echo 'export PATH=\$PATH:$LCIO_DIR/bin' >> /etc/profile.d/LCIO.sh" && \
 	sudo chmod +x /etc/profile.d/LCIO.sh
 
 # CLHEP
@@ -132,13 +141,12 @@ RUN sudo bash -c 'echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib6
 RUN sudo pacman -S --noconfirm \
         boost
 
-ENV DD4HEP_COMMIT 645ab689a318e6dab9f920410e275da94c5702f0
+ENV DD4HEP_COMMIT c7f31bdc510c1eb8a4041dc4964597b6a495e20d
 ENV DD4HEP_DIR /opt/DD4hep
 
-RUN git clone https://github.com/AIDASoft/DD4hep.git && \
+RUN git clone https://github.com/decibelCooper/DD4hep.git && \
 	cd DD4hep && \
-	git checkout $DDHEP_COMMIT && \
-	sed -i "66,74d;80,108d" cmake/thisdd4hep.sh && \
+	git checkout $DD4HEP_COMMIT && \
 	cd .. && \
 	mkdir build && \
 	cd build && \
@@ -157,7 +165,7 @@ RUN git clone https://github.com/AIDASoft/DD4hep.git && \
 	cd .. && \
 	rm -rf build DD4hep
 
-RUN sudo bash -c 'echo ". '$DD4HEP_DIR'/bin/thisdd4hep.sh" > /etc/profile.d/DD4hep.sh' && \
+RUN sudo bash -c 'echo ". '$DD4HEP_DIR'/bin/thisdd4hep_only.sh" > /etc/profile.d/DD4hep.sh' && \
         sudo chmod +x /etc/profile.d/DD4hep.sh
 
 # lcgeo
@@ -182,8 +190,6 @@ RUN git clone https://github.com/iLCSoft/lcgeo.git $LCGEO_DIR && \
 
 RUN sudo bash -c 'echo ". '$LCGEO_DIR'/bin/thislcgeo.sh" > /etc/profile.d/lcgeo.sh' && \
         sudo chmod +x /etc/profile.d/lcgeo.sh
-
-
 
 # Oracle JDK
 RUN git clone https://aur.archlinux.org/jdk.git && \
@@ -282,10 +288,15 @@ RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/slicPandora.sh" && 
 ADD promc2lcio.tar.gz /opt/
 
 RUN sudo chown -R fpadsimuser:fpadsimuser /opt/promc2lcio && \
+	cd /opt/promc2lcio && \
+	sed -i "441i                        if (status != 1) continue;" promc2lcio.java && \
+	sed -i "s/fdata=proev.*/fdata=null\;/" promc2lcio.java && \
+	sed -i "s/idata=proev.*/idata=null\;/" promc2lcio.java && \
 	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/promc.sh" && \
 	echo 'export basepath=/opt/promc2lcio/lib; export CLASSPATH=$CLASSPATH:/opt/promc2lcio:${basepath}/freehep-mcfio-2.0.1.jar:${basepath}/lcio-2.4.4-SNAPSHOT-bin.jar:${basepath}/freehep-xdr-2.0.3.jar:/usr/local/promc/java/promc-protobuf.jar:/opt/promc2lcio/lib/browser_promc.jar' | \
 		sudo bash -c "cat >> /etc/profile.d/promc.sh" && \
-	sudo chmod +x /etc/profile.d/promc.sh
+	sudo chmod +x /etc/profile.d/promc.sh && \
+	bash -l -c "javac promc2lcio.java"
 
 # lcio2hepsim
 ADD lcio2hepsim.tar.gz /opt
@@ -320,7 +331,7 @@ RUN sudo pacman -S --noconfirm \
 
 RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
 	cd /opt/lcsim && \
-	git checkout 51cfd322a49f2c131221eec89fa2da6e348a3523 && \
+	git checkout 7a8a79c67a33c8319725faa5557ecf11091a786a && \
 	cd detector-framework && \
         . /opt/JNIMathLib/bin/JNIMathLib-env.sh && \
         mvn install:install-file -Dfile=$(ls /opt/JNIMathLib/*.jar) -DgroupId=eic -DartifactId=jnimathlib -Dversion=0.1 -Dpackaging=jar && \
