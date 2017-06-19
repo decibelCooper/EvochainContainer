@@ -66,16 +66,8 @@ RUN git clone https://github.com/root-project/root.git && \
 RUN sudo bash -c 'echo ". /usr/local/bin/thisroot.sh" > /etc/profile.d/ROOT.sh' && \
         sudo chmod +x /etc/profile.d/ROOT.sh
 
-# Oracle JDK
-RUN git clone https://aur.archlinux.org/jdk.git && \
-	cd jdk && \
-	git checkout eaa4d0bec2f6b573c15c1214c030198215bcb1b2 && \
-	makepkg -si --noconfirm && \
-	cd .. && \
-	rm -rf jdk
-
 # LCIO
-ENV	LCIO_VERSION 02-04-03
+ENV	LCIO_VERSION 02-08
 ENV	LCIO_DIR /opt/LCIO
 
 RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
