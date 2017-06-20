@@ -66,27 +66,6 @@ RUN git clone https://github.com/root-project/root.git && \
 RUN sudo bash -c 'echo ". /usr/local/bin/thisroot.sh" > /etc/profile.d/ROOT.sh' && \
         sudo chmod +x /etc/profile.d/ROOT.sh
 
-# LCIO
-ENV	LCIO_VERSION 02-08
-ENV	LCIO_DIR /opt/LCIO
-
-RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
-        cd $LCIO_DIR && \
-	git checkout tags/v$LCIO_VERSION && \
-	cd ~/ && \
-	mkdir build && \
-	cd build && \
-	CXXFLAGS=-std=c++14 cmake $LCIO_DIR \
-	    -DBUILD_ROOTDICT=ON && \
-	make -j30 && \
-	make install && \
-	cd ../ && \
-	rm -rf build
-
-RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' >> /etc/profile.d/LCIO.sh" && \
-	sudo bash -c "echo 'export PATH=\$PATH:$LCIO_DIR/bin' >> /etc/profile.d/LCIO.sh" && \
-	sudo chmod +x /etc/profile.d/LCIO.sh
-
 # CLHEP
 RUN sudo pacman -S --noconfirm \
 	wget \
@@ -128,6 +107,27 @@ RUN git clone https://github.com/Geant4/geant4.git && \
 RUN sudo bash -c 'echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib64" >> /etc/profile.d/geant4.sh' && \
         sudo bash -c 'echo ". /usr/local/bin/geant4.sh" > /etc/profile.d/geant4.sh' && \
         sudo chmod +x /etc/profile.d/geant4.sh
+
+# LCIO
+ENV	LCIO_VERSION 02-08
+ENV	LCIO_DIR /opt/LCIO
+
+RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
+        cd $LCIO_DIR && \
+	git checkout tags/v$LCIO_VERSION && \
+	cd ~/ && \
+	mkdir build && \
+	cd build && \
+	CXXFLAGS=-std=c++14 cmake $LCIO_DIR \
+	    -DBUILD_ROOTDICT=ON && \
+	make -j30 && \
+	make install && \
+	cd ../ && \
+	rm -rf build
+
+RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' >> /etc/profile.d/LCIO.sh" && \
+	sudo bash -c "echo 'export PATH=\$PATH:$LCIO_DIR/bin' >> /etc/profile.d/LCIO.sh" && \
+	sudo chmod +x /etc/profile.d/LCIO.sh
 
 # DD4hep
 RUN sudo pacman -S --noconfirm \
@@ -318,25 +318,27 @@ RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/JNIMathLib.sh" && \
 	sudo chmod +x /etc/profile.d/JNIMathLib.sh
 
 # LCSIM
+ENV LCSIM_VERSION 3.4
+ENV LCSIM_COMMIT c0be9e65cce7caa3b75da2ea78bb4720137ba63f
+
 RUN sudo pacman -S --noconfirm \
         maven
 
 RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
 	cd /opt/lcsim && \
-	git checkout 7a8a79c67a33c8319725faa5557ecf11091a786a && \
+	git checkout $LCSIM_COMMIT && \
 	cd detector-framework && \
         . /opt/JNIMathLib/bin/JNIMathLib-env.sh && \
         mvn install:install-file -Dfile=$(ls /opt/JNIMathLib/*.jar) -DgroupId=eic -DartifactId=jnimathlib -Dversion=0.1 -Dpackaging=jar && \
         sed -i 's/<\/dependencies>/    <dependency><groupId>eic<\/groupId><artifactId>jnimathlib<\/artifactId><version>0.1<\/version><\/dependency>\n    <\/dependencies>/' pom.xml && \
         sed -i 's/\<Math.acos/eic.jnimathlib.CMath.acos/' ./src/main/java/org/lcsim/detector/solids/GeomOp3D.java && \
         sed -i 's/\(import java\.util\.List;\)/\1\n\nimport eic\.jnimathlib\.CMath;/' ./src/main/java/org/lcsim/detector/solids/GeomOp3D.java && \
-        mvn && \
-        cd ../distribution && \
+        cd .. && \
         mvn && \
 	rm -rf ~/.m2
 
 RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
-        echo "export CLICSOFT=/opt/lcsim; export GEOMCONVERTERDIR=\$CLICSOFT/detector-framework; export GCONVERTER=\$GEOMCONVERTERDIR/target/lcsim-detector-framework-3.8-bin.jar" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
+        echo "export CLICSOFT=/opt/lcsim; export GEOMCONVERTERDIR=\$CLICSOFT/detector-framework; export GCONVERTER=\$GEOMCONVERTERDIR/target/lcsim-detector-framework-$LCSIM_VERSION-bin.jar" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
         sudo chmod +x /etc/profile.d/lcsim.sh
 
 # Convenience tools
