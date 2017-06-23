@@ -318,8 +318,8 @@ RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/JNIMathLib.sh" && \
 	sudo chmod +x /etc/profile.d/JNIMathLib.sh
 
 # LCSIM
-ENV LCSIM_VERSION 3.4
-ENV LCSIM_COMMIT c0be9e65cce7caa3b75da2ea78bb4720137ba63f
+ENV LCSIM_VERSION 3.9-SNAPSHOT
+ENV LCSIM_COMMIT 82bbd9c79fbaddd3e78aafe0a92686e3bea45d21
 
 RUN sudo pacman -S --noconfirm \
         maven
@@ -334,7 +334,7 @@ RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
         sed -i 's/\<Math.acos/eic.jnimathlib.CMath.acos/' ./src/main/java/org/lcsim/detector/solids/GeomOp3D.java && \
         sed -i 's/\(import java\.util\.List;\)/\1\n\nimport eic\.jnimathlib\.CMath;/' ./src/main/java/org/lcsim/detector/solids/GeomOp3D.java && \
         cd .. && \
-        mvn && \
+        mvn -DskipTests && \
 	rm -rf ~/.m2
 
 RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
