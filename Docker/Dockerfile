@@ -299,8 +299,7 @@ RUN sudo chown -R fpadsimuser:fpadsimuser /opt/lcio2hepsim && \
 	make
 
 # fpadsim
-RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/fpadsim.sh" && \
-	echo 'export FPADSIM=/opt' | sudo bash -c "cat >> /etc/profile.d/fpadsim.sh" && \
+RUN echo 'export FPADSIM=/opt' | sudo bash -c "cat >> /etc/profile.d/fpadsim.sh" && \
 	sudo chmod +x /etc/profile.d/fpadsim.sh
 
 # Required tools from Arch repository
@@ -308,18 +307,9 @@ RUN sudo pacman -S --noconfirm \
 	libxtst \
 	zip
 
-# JNIMathLib
-RUN git clone https://github.com/decibelCooper/JNIMathLib.git /opt/JNIMathLib &&\
-	cd /opt/JNIMathLib && \
-	make -j30
-
-RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/JNIMathLib.sh" && \
-	echo ". /opt/JNIMathLib/bin/JNIMathLib-env.sh" | sudo bash -c "cat >> /etc/profile.d/JNIMathLib.sh" && \
-	sudo chmod +x /etc/profile.d/JNIMathLib.sh
-
 # LCSIM
-ENV LCSIM_VERSION 3.9-SNAPSHOT
-ENV LCSIM_COMMIT 82bbd9c79fbaddd3e78aafe0a92686e3bea45d21
+ENV LCSIM_VERSION 3.9-DD4HEP
+ENV LCSIM_COMMIT 8b812b914b1044f2e351fffab21d20f9c94c77e0
 
 RUN sudo pacman -S --noconfirm \
         maven
@@ -328,11 +318,6 @@ RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
 	cd /opt/lcsim && \
 	git checkout $LCSIM_COMMIT && \
 	cd detector-framework && \
-        . /opt/JNIMathLib/bin/JNIMathLib-env.sh && \
-        mvn install:install-file -Dfile=$(ls /opt/JNIMathLib/*.jar) -DgroupId=eic -DartifactId=jnimathlib -Dversion=0.1 -Dpackaging=jar && \
-        sed -i 's/<\/dependencies>/    <dependency><groupId>eic<\/groupId><artifactId>jnimathlib<\/artifactId><version>0.1<\/version><\/dependency>\n    <\/dependencies>/' pom.xml && \
-        sed -i 's/\<Math.acos/eic.jnimathlib.CMath.acos/' ./src/main/java/org/lcsim/detector/solids/GeomOp3D.java && \
-        sed -i 's/\(import java\.util\.List;\)/\1\n\nimport eic\.jnimathlib\.CMath;/' ./src/main/java/org/lcsim/detector/solids/GeomOp3D.java && \
         cd .. && \
         mvn -DskipTests && \
 	rm -rf ~/.m2
