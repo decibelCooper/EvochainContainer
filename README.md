@@ -1,16 +1,17 @@
-# FPaDSim Container
+# Evochain Container
 
 ## Description
 
 This repository contains a Dockerfile and a few local tarballs for generating a
-Docker image that is intended to replicate the environment produced by Sergei
-Chekanov's FPaDSim package.
+Docker image containing everything needed to link together an evolving EIC
+simulation and reconstruction chain.  This chain evolves from the FPaDSim chain
+towards the long-term goals of Argonne EIC software efforts.
 
 ## Usage
 
 On a machine/user that has Docker properly installed, run
 
-$ docker build -t fpadsim Docker
+$ docker build -t evochain Docker
 
-, where the fpadsim tag may be replaced with the user's choice.
+, where the evochain tag may be replaced with the user's choice.
 
