@@ -308,17 +308,14 @@ RUN sudo pacman -S --noconfirm \
 	zip
 
 # LCSIM
-ENV LCSIM_VERSION 3.9-DD4HEP
-ENV LCSIM_COMMIT 8b812b914b1044f2e351fffab21d20f9c94c77e0
+ENV LCSIM_VERSION 4.0-SNAPSHOT
 
 RUN sudo pacman -S --noconfirm \
         maven
 
 RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
 	cd /opt/lcsim && \
-	git checkout $LCSIM_COMMIT && \
-	cd detector-framework && \
-        cd .. && \
+	git checkout evochain && \
         mvn -DskipTests && \
 	rm -rf ~/.m2
 
