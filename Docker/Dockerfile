@@ -316,5 +316,6 @@ RUN sudo pacman -S --noconfirm \
 # Convenience tools
 RUN sudo pacman -S --noconfirm \
         openssh \
-        vim
+        vim \
+        go
 
