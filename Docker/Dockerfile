@@ -10,37 +10,32 @@ RUN pacman -S --noconfirm \
 	sudo
 
 RUN useradd -m -G wheel fpadsimuser && \
-    sed -i.bak 's/# \(%wheel ALL=(ALL) NOPASSWD: ALL\)/\1/' /etc/sudoers && \
-    mkdir /fpadsim && \
-    chown fpadsimuser:fpadsimuser /fpadsim
+    sed -i.bak 's/# \(%wheel ALL=(ALL) NOPASSWD: ALL\)/\1/' /etc/sudoers
 
 USER fpadsimuser
-WORKDIR /fpadsim
+WORKDIR /home/fpadsimuser
 
 CMD /bin/bash -l
 
 # ROOT
 RUN sudo pacman -S --noconfirm \
-	awk \
-	base \
-	base-devel \
-	binutils \
-	cmake \
-	fakeroot \
-	fftw \
-	gcc \
-	git \
-	glew \
-	glu \
-	grep \
-	gsl \
-	gzip \
-	make \
-	python2 \
-	libx11 \
-	libxft \
-	libxpm && \
-	sudo pacman -R --noconfirm linux
+        awk \
+        binutils \
+        cmake \
+        fakeroot \
+        fftw \
+        gcc \
+        git \
+        glew \
+        glu \
+        grep \
+        gsl \
+        gzip \
+        make \
+        python2 \
+        libx11 \
+        libxft \
+        libxpm
 
 ENV ROOT_VERSION 6-10-00
 
@@ -133,7 +128,7 @@ RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' 
 RUN sudo pacman -S --noconfirm \
         boost
 
-ENV DD4HEP_COMMIT c7f31bdc510c1eb8a4041dc4964597b6a495e20d
+ENV DD4HEP_COMMIT cc4491b901a2c867be2b47bc498d9b8d816b440a
 ENV DD4HEP_DIR /opt/DD4hep
 
 RUN git clone https://github.com/decibelCooper/DD4hep.git && \
@@ -161,7 +156,7 @@ RUN sudo bash -c 'echo ". '$DD4HEP_DIR'/bin/thisdd4hep_only.sh" > /etc/profile.d
         sudo chmod +x /etc/profile.d/DD4hep.sh
 
 # lcgeo
-ENV LCGEO_COMMIT 72f221aa21c87c034cc9b96909cfe559915f2715
+ENV LCGEO_COMMIT 0662f71bdf889346abe5daa8096324f906de4426
 ENV LCGEO_DIR /opt/lcgeo
 
 RUN git clone https://github.com/iLCSoft/lcgeo.git $LCGEO_DIR && \
@@ -184,39 +179,15 @@ RUN sudo bash -c 'echo ". '$LCGEO_DIR'/bin/thislcgeo.sh" > /etc/profile.d/lcgeo.
         sudo chmod +x /etc/profile.d/lcgeo.sh
 
 # Oracle JDK
+RUN sudo pacman -S --noconfirm \
+        file
+
 RUN git clone https://aur.archlinux.org/jdk.git && \
 	cd jdk && \
 	git checkout eaa4d0bec2f6b573c15c1214c030198215bcb1b2 && \
 	makepkg -si --noconfirm && \
 	cd .. && \
 	rm -rf jdk
-
-# Jas4pp
-RUN wget -q http://atlaswww.hep.anl.gov/asc/jas4pp/download/current.php -O jas4pp.tgz && \
-	tar -xzf jas4pp.tgz -C /opt && \
-	rm jas4pp.tgz
-
-RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/jas4pp.sh" && \
-	sudo bash -c 'echo "source /opt/jas4pp/setup.sh" > /etc/profile.d/jas4pp.sh' && \
-	sudo chmod +x /etc/profile.d/jas4pp.sh && \
-	source /opt/jas4pp/setup.sh
-
-# ProMC
-RUN sudo pacman -S --noconfirm \
-	rsync
-
-RUN wget -q http://atlaswww.hep.anl.gov/asc/promc/download/current.php -O ProMC.tgz && \
-	tar -xzf ProMC.tgz && \
-	cd ProMC && \
-	./build.sh && \
-	sed -ibak "s/read yn/yn=y/" install.sh && \
-	sudo ./install.sh /usr/local && \
-	cd ../ && \
-	sudo rm -rf ProMC.tgz ProMC
-
-RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/promc.sh" && \
-	sudo bash -c 'echo "source /usr/local/promc/setup.sh" > /etc/profile.d/promc.sh' && \
-	sudo chmod +x /etc/profile.d/promc.sh
 
 # iLCUtil
 ENV ILCUTIL_DIR /opt/iLCUtil
@@ -276,20 +247,6 @@ RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/slicPandora.sh" && 
 	echo 'export slicPandora_DIR=/opt/slicPandora' | sudo bash -c "cat >> /etc/profile.d/slicPandora.sh" && \
 	sudo chmod +x /etc/profile.d/slicPandora.sh
 
-# promc2lcio
-ADD promc2lcio.tar.gz /opt/
-
-RUN sudo chown -R fpadsimuser:fpadsimuser /opt/promc2lcio && \
-	cd /opt/promc2lcio && \
-	sed -i "441i                        if (status != 1) continue;" promc2lcio.java && \
-	sed -i "s/fdata=proev.*/fdata=null\;/" promc2lcio.java && \
-	sed -i "s/idata=proev.*/idata=null\;/" promc2lcio.java && \
-	echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/promc.sh" && \
-	echo 'export basepath=/opt/promc2lcio/lib; export CLASSPATH=$CLASSPATH:/opt/promc2lcio:${basepath}/freehep-mcfio-2.0.1.jar:${basepath}/lcio-2.4.4-SNAPSHOT-bin.jar:${basepath}/freehep-xdr-2.0.3.jar:/usr/local/promc/java/promc-protobuf.jar:/opt/promc2lcio/lib/browser_promc.jar' | \
-		sudo bash -c "cat >> /etc/profile.d/promc.sh" && \
-	sudo chmod +x /etc/profile.d/promc.sh && \
-	bash -l -c "javac promc2lcio.java"
-
 # lcio2hepsim
 ADD lcio2hepsim.tar.gz /opt
 
@@ -302,16 +259,12 @@ RUN sudo chown -R fpadsimuser:fpadsimuser /opt/lcio2hepsim && \
 RUN echo 'export FPADSIM=/opt' | sudo bash -c "cat >> /etc/profile.d/fpadsim.sh" && \
 	sudo chmod +x /etc/profile.d/fpadsim.sh
 
-# Required tools from Arch repository
-RUN sudo pacman -S --noconfirm \
-	libxtst \
-	zip
-
 # LCSIM
-ENV LCSIM_VERSION 4.0-SNAPSHOT
-
 RUN sudo pacman -S --noconfirm \
-        maven
+        maven \
+	which
+
+ENV LCSIM_VERSION 4.0-SNAPSHOT
 
 RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
 	cd /opt/lcsim && \
@@ -322,6 +275,43 @@ RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
 RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
         echo "export CLICSOFT=/opt/lcsim; export GEOMCONVERTERDIR=\$CLICSOFT/detector-framework; export GCONVERTER=\$GEOMCONVERTERDIR/target/lcsim-detector-framework-$LCSIM_VERSION-bin.jar" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
         sudo chmod +x /etc/profile.d/lcsim.sh
+
+# ProMC
+RUN sudo pacman -S --noconfirm \
+        diffutils \
+        pkg-config \
+        rsync
+
+ENV PROMC_VERSION 1.6
+
+RUN wget http://atlaswww.hep.anl.gov/asc/promc/download/ProMC-$PROMC_VERSION.tgz -q -O ProMC.tgz && \
+        tar -xzf ProMC.tgz && \
+        cd ProMC && \
+        ./build.sh && \
+        sed -ibak "s/read yn/yn=y/" install.sh && \
+        sudo ./install.sh /usr/local && \
+        cd ../ && \
+        sudo rm -rf ProMC.tgz ProMC
+
+RUN sudo bash -c 'echo "source /usr/local/promc/setup.sh" > /etc/profile.d/promc.sh' && \
+        echo 'promc2lcioBasepath=/usr/local/promc/examples/promc2lcio; export CLASSPATH=$CLASSPATH:${promc2lcioBasepath}:${promc2lcioBasepath}/lib/freehep-mcfio-2.0.1.jar:${promc2lcioBasepath}/lib/lcio-2.4.4-SNAPSHOT-bin.jar:${promc2lcioBasepath}/lib/freehep-xdr-2.0.3.jar:/usr/local/promc/java/promc-protobuf.jar:/usr/local/promc/examples/browser/browser_promc.jar' | \
+                sudo bash -c "cat >> /etc/profile.d/promc.sh" && \
+        sudo chmod +x /etc/profile.d/promc.sh
+
+# Jas4pp
+ENV JAS4PP_VERSION 1.2
+
+RUN wget https://atlaswww.hep.anl.gov/asc/jas4pp/download/jas4pp-$JAS4PP_VERSION.tgz -q -O jas4pp.tgz && \
+        tar -xzf jas4pp.tgz -C /opt && \
+        rm jas4pp.tgz && \
+        sudo bash -c 'echo "source /opt/jas4pp/setup.sh" > /etc/profile.d/jas4pp.sh' && \
+        sudo chmod +x /etc/profile.d/jas4pp.sh && \
+        /etc/profile.d/jas4pp.sh
+
+# Required tools from Arch repository
+RUN sudo pacman -S --noconfirm \
+	libxtst \
+	zip
 
 # Convenience tools
 RUN sudo pacman -S --noconfirm \
