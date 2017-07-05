@@ -128,7 +128,7 @@ RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' 
 RUN sudo pacman -S --noconfirm \
         boost
 
-ENV DD4HEP_COMMIT cc4491b901a2c867be2b47bc498d9b8d816b440a
+ENV DD4HEP_COMMIT e6472e8a83ad783dee1c6ca2dc1192e0fb35dad6
 ENV DD4HEP_DIR /opt/DD4hep
 
 RUN git clone https://github.com/decibelCooper/DD4hep.git && \
@@ -265,10 +265,12 @@ RUN sudo pacman -S --noconfirm \
         which
 
 ENV LCSIM_VERSION 4.0-SNAPSHOT
+ENV LCSIM_COMMIT da1dce74afae2309ad7ea82120427d71bb782145
 
 RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
     cd /opt/lcsim && \
     git checkout evochain && \
+    git checkout $LCSIM_COMMIT && \
     mvn -DskipTests && \
     rm -rf ~/.m2
 
