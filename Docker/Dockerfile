@@ -1,16 +1,16 @@
 # Author: David Blyth
 # Description: Docker build merging the FPaDSim chain from Sergei Chekanov
-#     with long-term EIC efforts at ANL
+#	  with long-term EIC efforts at ANL
 
 FROM dbcooper/arch:2017-05-02
 
 # Set up basic environment
 RUN pacman -S --noconfirm \
-        sed \
-        sudo
+		sed \
+		sudo
 
 RUN useradd -m -G wheel fpadsimuser && \
-    sed -i.bak 's/# \(%wheel ALL=(ALL) NOPASSWD: ALL\)/\1/' /etc/sudoers
+	sed -i.bak 's/# \(%wheel ALL=(ALL) NOPASSWD: ALL\)/\1/' /etc/sudoers
 
 USER fpadsimuser
 WORKDIR /home/fpadsimuser
@@ -19,23 +19,23 @@ CMD /bin/bash -l
 
 # ROOT
 RUN sudo pacman -S --noconfirm \
-        awk \
-        binutils \
-        cmake \
-        fakeroot \
-        fftw \
-        gcc \
-        git \
-        glew \
-        glu \
-        grep \
-        gsl \
-        gzip \
-        make \
-        python2 \
-        libx11 \
-        libxft \
-        libxpm
+		awk \
+		binutils \
+		cmake \
+		fakeroot \
+		fftw \
+		gcc \
+		git \
+		glew \
+		glu \
+		grep \
+		gsl \
+		gzip \
+		make \
+		python2 \
+		libx11 \
+		libxft \
+		libxpm
 
 ENV ROOT_VERSION 6-10-00
 
@@ -46,25 +46,25 @@ RUN git clone https://github.com/root-project/root.git && \
 	mkdir build && \
 	cd build && \
 	cmake ../root \
-	    -Dbuiltin_glew=OFF \
-	    -Dcxx14=ON \
-	    -Dgdml=ON \
-	    -Dgsl_shared=ON \
-	    -Dmathmore=ON \
-	    -Dminuit2=ON \
-	    -Dopengl=ON && \
+		-Dbuiltin_glew=OFF \
+		-Dcxx14=ON \
+		-Dgdml=ON \
+		-Dgsl_shared=ON \
+		-Dmathmore=ON \
+		-Dminuit2=ON \
+		-Dopengl=ON && \
 	make -j30 && \
 	sudo make install && \ 
 	cd .. && \
 	rm -rf build root
 
 RUN sudo bash -c 'echo ". /usr/local/bin/thisroot.sh" > /etc/profile.d/ROOT.sh' && \
-    sudo chmod +x /etc/profile.d/ROOT.sh
+	sudo chmod +x /etc/profile.d/ROOT.sh
 
 # CLHEP
 RUN sudo pacman -S --noconfirm \
-        wget \
-        xerces-c
+		wget \
+		xerces-c
 
 ENV CLHEP_VERSION 2.3.4.4
 
@@ -87,34 +87,34 @@ RUN git clone https://github.com/Geant4/geant4.git && \
 	cd geant4 && \
 	git checkout tags/v$GEANT4_VERSION && \
 	cd .. && \
-    mkdir build && \
-    cd build && \
-    cmake ../geant4 \
-        -DGEANT4_BUILD_CXXSTD=14 \
-        -DGEANT4_INSTALL_DATA=ON \
-        -DGEANT4_USE_GDML=ON \
-        -DGEANT4_USE_SYSTEM_CLHEP=ON && \
-    make -j30 && \
-    sudo make install && \
-    cd .. && \
-    rm -rf build geant4
+	mkdir build && \
+	cd build && \
+	cmake ../geant4 \
+		-DGEANT4_BUILD_CXXSTD=14 \
+		-DGEANT4_INSTALL_DATA=ON \
+		-DGEANT4_USE_GDML=ON \
+		-DGEANT4_USE_SYSTEM_CLHEP=ON && \
+	make -j30 && \
+	sudo make install && \
+	cd .. && \
+	rm -rf build geant4
 
 RUN sudo bash -c 'echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib64" >> /etc/profile.d/geant4.sh' && \
-    sudo bash -c 'echo ". /usr/local/bin/geant4.sh" > /etc/profile.d/geant4.sh' && \
-    sudo chmod +x /etc/profile.d/geant4.sh
+	sudo bash -c 'echo ". /usr/local/bin/geant4.sh" > /etc/profile.d/geant4.sh' && \
+	sudo chmod +x /etc/profile.d/geant4.sh
 
 # LCIO
 ENV	LCIO_VERSION 02-08
 ENV	LCIO_DIR /opt/LCIO
 
 RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
-    cd $LCIO_DIR && \
+	cd $LCIO_DIR && \
 	git checkout tags/v$LCIO_VERSION && \
 	cd ~/ && \
 	mkdir build && \
 	cd build && \
 	CXXFLAGS=-std=c++14 cmake $LCIO_DIR \
-	    -DBUILD_ROOTDICT=ON && \
+		-DBUILD_ROOTDICT=ON && \
 	make -j30 && \
 	make install && \
 	cd ../ && \
@@ -126,7 +126,7 @@ RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' 
 
 # DD4hep
 RUN sudo pacman -S --noconfirm \
-        boost
+		boost
 
 ENV DD4HEP_COMMIT e6472e8a83ad783dee1c6ca2dc1192e0fb35dad6
 ENV DD4HEP_DIR /opt/DD4hep
@@ -139,21 +139,21 @@ RUN git clone https://github.com/decibelCooper/DD4hep.git && \
 	cd build && \
 	. /etc/profile.d/ROOT.sh && \
 	CXXFLAGS=-std=c++14 cmake ../DD4hep  \
-	    -DBUILD_TESTING=ON \
-	    -DCMAKE_INSTALL_PREFIX=$DD4HEP_DIR \
-	    -DDD4HEP_USE_CXX14=ON   \
-	    -DDD4HEP_USE_GEANT4=ON \
-	    -DDD4HEP_USE_GEAR=OFF   \
-	    -DDD4HEP_USE_LCIO=ON   \
-	    -DDD4HEP_USE_PYROOT=ON \
-	    -DDD4HEP_USE_XERCESC=ON && \
+		-DBUILD_TESTING=ON \
+		-DCMAKE_INSTALL_PREFIX=$DD4HEP_DIR \
+		-DDD4HEP_USE_CXX14=ON	\
+		-DDD4HEP_USE_GEANT4=ON \
+		-DDD4HEP_USE_GEAR=OFF	\
+		-DDD4HEP_USE_LCIO=ON   \
+		-DDD4HEP_USE_PYROOT=ON \
+		-DDD4HEP_USE_XERCESC=ON && \
 	make -j30 && \
 	make install && \
 	cd .. && \
 	rm -rf build DD4hep
 
 RUN sudo bash -c 'echo ". '$DD4HEP_DIR'/bin/thisdd4hep_only.sh" > /etc/profile.d/DD4hep.sh' && \
-    sudo chmod +x /etc/profile.d/DD4hep.sh
+	sudo chmod +x /etc/profile.d/DD4hep.sh
 
 # lcgeo
 ENV LCGEO_COMMIT 0662f71bdf889346abe5daa8096324f906de4426
@@ -170,17 +170,17 @@ RUN git clone https://github.com/iLCSoft/lcgeo.git $LCGEO_DIR && \
 	cd build && \
 	. /etc/profile.d/DD4hep.sh && \
 	cmake $LCGEO_DIR \ 
-	    -DBUILD_TESTING=OFF && \
+		-DBUILD_TESTING=OFF && \
 	make -j30 install && \
 	cd .. && \
 	rm -rf build
 
 RUN sudo bash -c 'echo ". '$LCGEO_DIR'/bin/thislcgeo.sh" > /etc/profile.d/lcgeo.sh' && \
-    sudo chmod +x /etc/profile.d/lcgeo.sh
+	sudo chmod +x /etc/profile.d/lcgeo.sh
 
 # Oracle JDK
 RUN sudo pacman -S --noconfirm \
-        file
+		file
 
 RUN git clone https://aur.archlinux.org/jdk.git && \
 	cd jdk && \
@@ -261,63 +261,63 @@ RUN echo 'export FPADSIM=/opt' | sudo bash -c "cat >> /etc/profile.d/fpadsim.sh"
 
 # LCSIM
 RUN sudo pacman -S --noconfirm \
-        maven \
-        which
+		maven \
+		which
 
 ENV LCSIM_VERSION 4.0-SNAPSHOT
 ENV LCSIM_COMMIT da1dce74afae2309ad7ea82120427d71bb782145
 
 RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
-    cd /opt/lcsim && \
-    git checkout evochain && \
-    git checkout $LCSIM_COMMIT && \
-    mvn -DskipTests && \
-    rm -rf ~/.m2
+	cd /opt/lcsim && \
+	git checkout evochain && \
+	git checkout $LCSIM_COMMIT && \
+	mvn -DskipTests && \
+	rm -rf ~/.m2
 
 RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
-    echo "export CLICSOFT=/opt/lcsim; export GEOMCONVERTERDIR=\$CLICSOFT/detector-framework; export GCONVERTER=\$GEOMCONVERTERDIR/target/lcsim-detector-framework-$LCSIM_VERSION-bin.jar" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
-    sudo chmod +x /etc/profile.d/lcsim.sh
+	echo "export CLICSOFT=/opt/lcsim; export GEOMCONVERTERDIR=\$CLICSOFT/detector-framework; export GCONVERTER=\$GEOMCONVERTERDIR/target/lcsim-detector-framework-$LCSIM_VERSION-bin.jar" | sudo bash -c "cat >> /etc/profile.d/lcsim.sh" && \
+	sudo chmod +x /etc/profile.d/lcsim.sh
 
 # ProMC
 RUN sudo pacman -S --noconfirm \
-        diffutils \
-        pkg-config \
-        rsync
+		diffutils \
+		pkg-config \
+		rsync
 
 ENV PROMC_VERSION 1.6
 
 RUN wget http://atlaswww.hep.anl.gov/asc/promc/download/ProMC-$PROMC_VERSION.tgz -q -O ProMC.tgz && \
-    tar -xzf ProMC.tgz && \
-    cd ProMC && \
-    ./build.sh && \
-    sed -ibak "s/read yn/yn=y/" install.sh && \
-    sudo ./install.sh /usr/local && \
-    cd ../ && \
-    sudo rm -rf ProMC.tgz ProMC
+	tar -xzf ProMC.tgz && \
+	cd ProMC && \
+	./build.sh && \
+	sed -ibak "s/read yn/yn=y/" install.sh && \
+	sudo ./install.sh /usr/local && \
+	cd ../ && \
+	sudo rm -rf ProMC.tgz ProMC
 
 RUN sudo bash -c 'echo "source /usr/local/promc/setup.sh" > /etc/profile.d/promc.sh' && \
-    echo 'promc2lcioBasepath=/usr/local/promc/examples/promc2lcio; export CLASSPATH=$CLASSPATH:${promc2lcioBasepath}:${promc2lcioBasepath}/lib/freehep-mcfio-2.0.1.jar:${promc2lcioBasepath}/lib/lcio-2.4.4-SNAPSHOT-bin.jar:${promc2lcioBasepath}/lib/freehep-xdr-2.0.3.jar:/usr/local/promc/java/promc-protobuf.jar:/usr/local/promc/examples/browser/browser_promc.jar' | \
-            sudo bash -c "cat >> /etc/profile.d/promc.sh" && \
-    sudo chmod +x /etc/profile.d/promc.sh
+	echo 'promc2lcioBasepath=/usr/local/promc/examples/promc2lcio; export CLASSPATH=$CLASSPATH:${promc2lcioBasepath}:${promc2lcioBasepath}/lib/freehep-mcfio-2.0.1.jar:${promc2lcioBasepath}/lib/lcio-2.4.4-SNAPSHOT-bin.jar:${promc2lcioBasepath}/lib/freehep-xdr-2.0.3.jar:/usr/local/promc/java/promc-protobuf.jar:/usr/local/promc/examples/browser/browser_promc.jar' | \
+			sudo bash -c "cat >> /etc/profile.d/promc.sh" && \
+	sudo chmod +x /etc/profile.d/promc.sh
 
 # Jas4pp
 ENV JAS4PP_VERSION 1.2
 
 RUN wget https://atlaswww.hep.anl.gov/asc/jas4pp/download/jas4pp-$JAS4PP_VERSION.tgz -q -O jas4pp.tgz && \
-    tar -xzf jas4pp.tgz -C /opt && \
-    rm jas4pp.tgz && \
-    sudo bash -c 'echo "source /opt/jas4pp/setup.sh" > /etc/profile.d/jas4pp.sh' && \
-    sudo chmod +x /etc/profile.d/jas4pp.sh && \
-    /etc/profile.d/jas4pp.sh
+	tar -xzf jas4pp.tgz -C /opt && \
+	rm jas4pp.tgz && \
+	sudo bash -c 'echo "source /opt/jas4pp/setup.sh" > /etc/profile.d/jas4pp.sh' && \
+	sudo chmod +x /etc/profile.d/jas4pp.sh && \
+	/etc/profile.d/jas4pp.sh
 
 # Required tools from Arch repository
 RUN sudo pacman -S --noconfirm \
-        libxtst \
-        zip
+		libxtst \
+		zip
 
 # Convenience tools
 RUN sudo pacman -S --noconfirm \
-        openssh \
-        vim \
-        go
+		openssh \
+		vim \
+		go
 
