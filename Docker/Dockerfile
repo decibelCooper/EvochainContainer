@@ -99,7 +99,7 @@ RUN git clone https://github.com/Geant4/geant4.git && \
 	cd .. && \
 	rm -rf build geant4
 
-RUN sudo bash -c 'echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/lib64" >> /etc/profile.d/geant4.sh' && \
+RUN sudo bash -c 'echo "export LD_LIBRARY_PATH=/usr/local/lib64:\$LD_LIBRARY_PATH" >> /etc/profile.d/geant4.sh' && \
 	sudo bash -c 'echo ". /usr/local/bin/geant4.sh" > /etc/profile.d/geant4.sh' && \
 	sudo chmod +x /etc/profile.d/geant4.sh
 
@@ -120,8 +120,8 @@ RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
 	cd ../ && \
 	rm -rf build
 
-RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$LCIO_DIR/lib' >> /etc/profile.d/LCIO.sh" && \
-	sudo bash -c "echo 'export PATH=\$PATH:$LCIO_DIR/bin' >> /etc/profile.d/LCIO.sh" && \
+RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=$LCIO_DIR/lib:\$LD_LIBRARY_PATH' >> /etc/profile.d/LCIO.sh" && \
+	sudo bash -c "echo 'export PATH=$LCIO_DIR/bin:\$PATH' >> /etc/profile.d/LCIO.sh" && \
 	sudo chmod +x /etc/profile.d/LCIO.sh
 
 # DD4hep
@@ -205,7 +205,7 @@ RUN git clone https://github.com/iLCSoft/iLCUtil.git && \
 	rm -rf iLCUtil build
 
 RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/iLCUtil.sh" && \
-	sudo bash -c "echo 'export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$ILCUTIL_DIR/lib' >> /etc/profile.d/iLCUtil.sh" && \
+	sudo bash -c "echo 'export LD_LIBRARY_PATH=$ILCUTIL_DIR/lib:\$LD_LIBRARY_PATH' >> /etc/profile.d/iLCUtil.sh" && \
 	sudo chmod +x /etc/profile.d/iLCUtil.sh
 
 # PandoraPFA
@@ -225,7 +225,7 @@ RUN git clone https://github.com/PandoraPFA/PandoraPFA.git && \
 	sudo make -j30 install
 
 RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/PandoraPFA.sh" && \
-	echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/PandoraPFA/lib' | sudo bash -c "cat >> /etc/profile.d/PandoraPFA.sh" && \
+	echo 'export LD_LIBRARY_PATH=/opt/PandoraPFA/lib:$LD_LIBRARY_PATH' | sudo bash -c "cat >> /etc/profile.d/PandoraPFA.sh" && \
 	sudo chmod +x /etc/profile.d/PandoraPFA.sh
 
 # slicPandora
@@ -243,7 +243,8 @@ RUN wget -q http://www.hep.phy.cam.ac.uk/~marshall/slicPandora_Pandora_v02.09.00
 	sudo rm -rf build slicPandora slicPandora.tar.gz
 
 RUN echo "#!/bin/bash" | sudo bash -c "cat >> /etc/profile.d/slicPandora.sh" && \
-	echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/slicPandora/lib' | sudo bash -c "cat >> /etc/profile.d/slicPandora.sh" && \
+	echo 'export LD_LIBRARY_PATH=/opt/slicPandora/lib:$LD_LIBRARY_PATH' | sudo bash -c "cat >> /etc/profile.d/slicPandora.sh" && \
+	echo 'export PATH=/opt/slicPandora/bin:$PATH' | sudo bash -c "cat >> /etc/profile.d/slicPandora.sh" && \
 	echo 'export slicPandora_DIR=/opt/slicPandora' | sudo bash -c "cat >> /etc/profile.d/slicPandora.sh" && \
 	sudo chmod +x /etc/profile.d/slicPandora.sh
 
@@ -310,6 +311,23 @@ RUN wget https://atlaswww.hep.anl.gov/asc/jas4pp/download/jas4pp-$JAS4PP_VERSION
 	sudo chmod +x /etc/profile.d/jas4pp.sh && \
 	/etc/profile.d/jas4pp.sh
 
+# Go
+RUN sudo pacman -S --noconfirm \
+		go \
+		mercurial
+
+ENV GOPATH /opt/Go
+
+RUN mkdir $GOPATH && \
+	echo 'export PATH='$GOPATH'/bin:$PATH' | sudo bash -c "cat >> /etc/profile.d/go.sh" && \
+	sudo chmod +x /etc/profile.d/go.sh
+
+# go-hep
+RUN go get go-hep.org/x/hep/...
+
+# gonum/plot
+RUN go get github.com/gonum/plot/...
+
 # Required tools from Arch repository
 RUN sudo pacman -S --noconfirm \
 		libxtst \
@@ -318,6 +336,9 @@ RUN sudo pacman -S --noconfirm \
 # Convenience tools
 RUN sudo pacman -S --noconfirm \
 		openssh \
-		vim \
-		go
+		psmisc \
+		vim
+
+# Evochain version
+ENV EVOCHAIN_VERSION 0.1
 
