@@ -10,8 +10,21 @@ towards the long-term goals of Argonne EIC software efforts.
 ## Usage
 
 On a machine/user that has Docker properly installed, run
-
-$ docker build -t evochain Docker
-
-, where the evochain tag may be replaced with the user's choice.
-
+```shell
+docker build -t evochain Docker
+```
+, where the evochain tag may be replaced with the user's choice.  Then,
+starting a container and getting the environment set up can be a simple as
+```shell
+docker run -it evochain
+```
+.  To install additional software inside the container, use the Arch Linux
+commands
+```shell
+sudo pacman -Ss KEYWORD
+```
+and
+```shell
+sudo pacman -S PACKAGE
+```
+to search for and install packages, respectively.
