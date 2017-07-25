@@ -266,7 +266,7 @@ RUN sudo pacman -S --noconfirm \
 		which
 
 ENV LCSIM_VERSION 4.0-SNAPSHOT
-ENV LCSIM_COMMIT da1dce74afae2309ad7ea82120427d71bb782145
+ENV LCSIM_COMMIT afeec2bfc615345b5b5cb3f2ea0ae8f6ee4b23d5
 
 RUN git clone https://github.com/decibelCooper/lcsim.git /opt/lcsim && \
 	cd /opt/lcsim && \
