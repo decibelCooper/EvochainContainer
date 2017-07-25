@@ -104,8 +104,8 @@ RUN sudo bash -c 'echo "export LD_LIBRARY_PATH=/usr/local/lib64:\$LD_LIBRARY_PAT
 	sudo chmod +x /etc/profile.d/geant4.sh
 
 # LCIO
-ENV	LCIO_VERSION 02-08
-ENV	LCIO_DIR /opt/LCIO
+ENV LCIO_VERSION 02-08
+ENV LCIO_DIR /opt/LCIO
 
 RUN git clone https://github.com/iLCSoft/LCIO.git /opt/LCIO && \
 	cd $LCIO_DIR && \
