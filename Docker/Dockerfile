@@ -319,7 +319,8 @@ RUN sudo pacman -S --noconfirm \
 ENV GOPATH /opt/Go
 
 RUN mkdir $GOPATH && \
-	echo 'export PATH='$GOPATH'/bin:$PATH' | sudo bash -c "cat >> /etc/profile.d/go.sh" && \
+	echo 'export GOPATH='$GOPATH | sudo bash -c "cat >> /etc/profile.d/go.sh" && \
+	echo 'export PATH=$GOPATH/bin:$PATH' | sudo bash -c "cat >> /etc/profile.d/go.sh" && \
 	sudo chmod +x /etc/profile.d/go.sh
 
 # go-hep
