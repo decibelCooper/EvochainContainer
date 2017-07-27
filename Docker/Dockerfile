@@ -128,7 +128,7 @@ RUN sudo bash -c "echo 'export LD_LIBRARY_PATH=$LCIO_DIR/lib:\$LD_LIBRARY_PATH' 
 RUN sudo pacman -S --noconfirm \
 		boost
 
-ENV DD4HEP_COMMIT e6472e8a83ad783dee1c6ca2dc1192e0fb35dad6
+ENV DD4HEP_COMMIT 7019f7a3a7c8de2ecb5092c0c290be608cc0e4f9
 ENV DD4HEP_DIR /opt/DD4hep
 
 RUN git clone https://github.com/decibelCooper/DD4hep.git && \
@@ -156,7 +156,7 @@ RUN sudo bash -c 'echo ". '$DD4HEP_DIR'/bin/thisdd4hep_only.sh" > /etc/profile.d
 	sudo chmod +x /etc/profile.d/DD4hep.sh
 
 # lcgeo
-ENV LCGEO_COMMIT 0662f71bdf889346abe5daa8096324f906de4426
+ENV LCGEO_COMMIT 0b878b60441d3dd4c46b4baea7d7e80e1c7b296b
 ENV LCGEO_DIR /opt/lcgeo
 
 RUN git clone https://github.com/iLCSoft/lcgeo.git $LCGEO_DIR && \
@@ -302,7 +302,7 @@ RUN sudo bash -c 'echo "source /usr/local/promc/setup.sh" > /etc/profile.d/promc
 	sudo chmod +x /etc/profile.d/promc.sh
 
 # Jas4pp
-ENV JAS4PP_VERSION 1.2
+ENV JAS4PP_VERSION 1.3
 
 RUN wget https://atlaswww.hep.anl.gov/asc/jas4pp/download/jas4pp-$JAS4PP_VERSION.tgz -q -O jas4pp.tgz && \
 	tar -xzf jas4pp.tgz -C /opt && \
